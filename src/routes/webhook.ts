@@ -1,27 +1,47 @@
-import {Router, Request, Response} from "express";
-import crypto from "crypto"; 
+import { Router, Request, Response } from "express";
+import crypto from "crypto";
+import { githubSecret } from "../config";
+import { reviewQueue } from "../queues/reviewQueue";
+import { ReviewJob } from "../types";
 
 const router = Router();
 
-router.post('/',async (req: Request,res: Response)=>{
+const verifySignature = (body: Buffer,  signature: string) => {
+    const computed =
+        "sha256=" + crypto.createHmac("sha256", githubSecret).update(body).digest("hex");
+    return crypto.timingSafeEqual(
+        Buffer.from(signature, "utf8"),
+        Buffer.from(computed, "utf8"),
+    );
+};
+
+router.post("/", async (req: Request, res: Response) => {
     const signature = req.headers["x-hub-signature-256"] as string;
-    const body = req.body as Buffer;
 
-    const secret = process.env.WEBHOOK_SECRET as string;
+    if (!verifySignature(req.body as Buffer, signature)) {
+       return res.status(401).json({ message: "Invalid signature" });
+    }
 
-    const computed = "sha256="+crypto.createHmac('sha-256',secret).update(body).digest('hex');
+    const payload = JSON.parse(req.body.toString());
+    const {action,number, pull_request, repository} = payload;
 
-    console.log("computed signature: ",computed);
-    console.log("actual signature: ",signature);
+    if(!["opened","reopened","synchronize"].includes(action)){
+        return res.status(200).json({"message":"Request ignored"});
+    }
 
-    const isValid = crypto.timingSafeEqual(Buffer.from(signature,'hex'),Buffer.from(computed,'hex'));
-    console.log("signature valid: ",isValid);
-    
+    const job: ReviewJob = {
+        action: action,
+        prNumber: number,
+        prHeadSha: pull_request.head.sha,
+        repositoryName: repository.full_name 
+    }
 
-    console.log('in webhook');
-    // console.log('request: ',JSON.parse(req.body.toString()));
+    const createdJob = await reviewQueue.add("review-pr",job,{
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+    });
 
-    return res.status(200).json({message:"webhook"});
-}) 
+    return res.status(200).json({ message: "webhook" });
+});
 
-export {router as WebhookRouter}
+export { router as WebhookRouter };
