@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import { groqAPIKey } from "../config";
 import { buildPrompt } from "../prompts/prompt";
+import { ReviewComment } from "../types";
 
 const Client = new Groq({
     apiKey: groqAPIKey
@@ -28,7 +29,17 @@ export const getAIResponse = async(params: ReviewCodeParams)=>{
     });
 
     const rawResponse = response.choices[0].message.content ?? "";
-    const cleanedResponse = rawResponse.replace(/```json\n?|```/g,"").trim();
-    const parsedRseponse = JSON.parse(cleanedResponse);
+    let parsedRseponse: {summary: string; comments: ReviewComment[]};
+    try{
+        const cleanedResponse = rawResponse.replace(/```json\n?|```/g,"").trim();
+        parsedRseponse = JSON.parse(cleanedResponse);
+
+    } catch(error){
+        console.error(`Failed parsing the response: ${error}`);
+        parsedRseponse = {
+            summary: "Review completed but could not be fully parsed. Please check the PR manually.",
+            comments: [],
+        };
+    }
     return parsedRseponse;
 }

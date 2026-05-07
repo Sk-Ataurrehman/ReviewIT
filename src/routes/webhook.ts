@@ -33,15 +33,17 @@ router.post("/", async (req: Request, res: Response) => {
         action: action,
         prNumber: number,
         prHeadSha: pull_request.head.sha,
-        repositoryName: repository.full_name 
+        repositoryName: repository.full_name ,
+        prTitle: pull_request.title,
+        prBody: pull_request.body,
     }
 
-    const createdJob = await reviewQueue.add("review-pr",job,{
+    await reviewQueue.add("review-pr",job,{
         attempts: 3,
         backoff: { type: "exponential", delay: 5000 },
     });
 
-    return res.status(200).json({ message: "webhook" });
+    return res.status(202).json({ message: "Review queued" });
 });
 
 export { router as WebhookRouter };

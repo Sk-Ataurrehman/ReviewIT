@@ -6,3 +6,11 @@ export interface ReviewJob{
     prTitle:string,
     prBody: string
 }
+
+export interface ReviewComment {
+    path: string,
+    line: number,
+    side: string,
+    body: string,
+    severity: "bug" | "security" | "performance" | "style" | "suggestion";
+}
