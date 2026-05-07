@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { githubAuthToken } from "../config";
+import { ReviewComment } from "../types";
 
 const octokit = new Octokit({
   auth: githubAuthToken,
@@ -27,14 +28,6 @@ export async function getPRDifference({
   );
 
   return response.data as unknown as string;
-}
-
-interface ReviewComment {
-    path: string,
-    line: number,
-    side: string,
-    body: string,
-    severity: "bug" | "security" | "performance" | "style" | "suggestion";
 }
 
 interface ReviewCommentParams{

@@ -19,7 +19,6 @@ export const reviewWorker = new Worker<ReviewJob>(
       prNumber: prNumber,
     });
     const reviewResponse = await getAIResponse({ prTitle, prBody, prDiff });
-    console.log("AI Response: ", reviewResponse);
     const [owner, repo] = repositoryName.split("/");
 
     const postedCount = await postReviewComments({
