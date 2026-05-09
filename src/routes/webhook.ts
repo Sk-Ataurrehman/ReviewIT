@@ -25,7 +25,7 @@ router.post("/", async (req: Request, res: Response) => {
     const payload = JSON.parse(req.body.toString());
     const {action,number, pull_request, repository} = payload;
 
-    if(!["opened","reopened","synchronize"].includes(action)){
+    if(!["opened","synchronize"].includes(action)){
         return res.status(200).json({"message":"Request ignored"});
     }
 
