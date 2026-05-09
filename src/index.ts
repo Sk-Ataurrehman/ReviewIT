@@ -4,11 +4,21 @@ import { WebhookRouter } from "./routes/webhook";
 import { HealthRouter } from "./routes/health";
 import {reviewWorker} from "./queues/reviewWorker";
 import { redis } from "./utils/redis";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use('/webhook',express.raw({type:"application/json"}));
+// Rate limiting - 30 request per 15 mins
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30, 
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." }
+})
+
+app.use('/webhook',limiter,express.raw({type:"application/json"}));
 
 // Routes
 app.use('/webhook',WebhookRouter);
