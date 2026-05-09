@@ -15,10 +15,11 @@ interface ReviewCodeParams {
 
 export const getAIResponse = async(params: ReviewCodeParams)=>{
     const {prTitle, prBody, prDiff} = params;
+    const truncatedDiff = prDiff.length > 20000 ? prDiff.slice(0,20000) + '\n... [diff truncated]': prDiff;
     const prompt = buildPrompt({
         prTitle,
         prBody,
-        prDiff
+        prDiff: truncatedDiff
     });
 
     const response = await Client.chat.completions.create({
@@ -28,18 +29,21 @@ export const getAIResponse = async(params: ReviewCodeParams)=>{
         temperature: 0.2, 
     });
 
-    const rawResponse = response.choices[0].message.content ?? "";
-    let parsedRseponse: {summary: string; comments: ReviewComment[]};
+    const rawResponse = response.choices[0]?.message?.content ?? "";
+    const tokensUsed =
+    (response.usage?.prompt_tokens ?? 0) +
+    (response.usage?.completion_tokens ?? 0);
+    let parsedResponse: {summary: string; comments: ReviewComment[]};
     try{
         const cleanedResponse = rawResponse.replace(/```json\n?|```/g,"").trim();
-        parsedRseponse = JSON.parse(cleanedResponse);
+        parsedResponse = JSON.parse(cleanedResponse);
 
     } catch(error){
         console.error(`Failed parsing the response: ${error}`);
-        parsedRseponse = {
+        parsedResponse = {
             summary: "Review completed but could not be fully parsed. Please check the PR manually.",
             comments: [],
         };
     }
-    return parsedRseponse;
+    return {...parsedResponse, tokensUsed};
 }
