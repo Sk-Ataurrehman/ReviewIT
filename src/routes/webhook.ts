@@ -23,9 +23,13 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     const payload = JSON.parse(req.body.toString());
-    const {action,number, pull_request, repository} = payload;
+    const {action,number, pull_request, repository, installation} = payload;
 
-    if(!["opened","synchronize"].includes(action)){
+    if(!installation?.id){
+        return res.status(200).json({"message":"Installation Id not found, ignoring request"});
+    }
+
+    if(!["opened","synchronize", "reopened"].includes(action)){
         return res.status(200).json({"message":"Request ignored"});
     }
 
@@ -36,8 +40,9 @@ router.post("/", async (req: Request, res: Response) => {
         repositoryName: repository.full_name ,
         prTitle: pull_request.title,
         prBody: pull_request.body,
+        installationId: installation?.id
     }
-
+     
     await reviewQueue.add("review-pr",job,{
         attempts: 3,
         backoff: { type: "exponential", delay: 5000 },

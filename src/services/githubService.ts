@@ -1,22 +1,19 @@
 import { Octokit } from "@octokit/rest";
-import { githubAuthToken } from "../config";
 import { ReviewComment } from "../types";
-
-const octokit = new Octokit({
-  auth: githubAuthToken,
-});
 
 interface FetchDiffParams {
   repoFullName: string;
   prNumber: number;
+  octokit: Octokit
 }
 
 export async function getPRDifference({
   repoFullName,
   prNumber,
+  octokit
 }: FetchDiffParams): Promise<string> {
-  const [owner, repo] = repoFullName.split("/");
 
+  const [owner, repo] = repoFullName.split("/");
   const response = await octokit.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}",
     {
@@ -36,7 +33,8 @@ interface ReviewCommentParams{
     pull_number: number,
     headsha: string,
     summary: string,
-    comments: ReviewComment[]
+    comments: ReviewComment[],
+    octokit: Octokit
 }
 
 export async function postReviewComments({
@@ -46,6 +44,7 @@ export async function postReviewComments({
     headsha,
     summary,
     comments,
+    octokit
 }: ReviewCommentParams) {
     await octokit.rest.pulls.createReview({
         owner,

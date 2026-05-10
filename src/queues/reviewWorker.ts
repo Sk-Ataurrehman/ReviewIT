@@ -5,6 +5,7 @@ import { getPRDifference, postReviewComments } from "../services/githubService";
 import IORedis from "ioredis";
 import { getAIResponse } from "../services/groqService";
 import { prisma } from "../utils/prisma";
+import { getInstallationOctoKit } from "../utils/githubAuth";
 
 const workerRedis = new IORedis(redisURL, {
   maxRetriesPerRequest: null,
@@ -14,7 +15,7 @@ const workerRedis = new IORedis(redisURL, {
 export const reviewWorker = new Worker<ReviewJob>(
   "review-pr",
   async (job: Job<ReviewJob>) => {
-    const { prNumber, prTitle, prBody, repositoryName, prHeadSha } = job.data;
+    const { prNumber, prTitle, prBody, repositoryName, prHeadSha,installationId } = job.data;
     const startTime = Date.now();
     console.log(`Reviewing PR #${prNumber} in ${repositoryName}`);
 
@@ -47,10 +48,14 @@ export const reviewWorker = new Worker<ReviewJob>(
     });
 
     try {
+      // Get octokit from IntallationId
+      const octokit = await getInstallationOctoKit(installationId);
+
       // Fetch the PR difference from github
       const prDiff = await getPRDifference({
         repoFullName: repositoryName,
         prNumber: prNumber,
+        octokit
       });
 
       // Skip if no difference found
@@ -73,6 +78,7 @@ export const reviewWorker = new Worker<ReviewJob>(
         headsha: prHeadSha,
         summary: reviewResponse.summary,
         comments: reviewResponse.comments,
+        octokit
       });
 
       console.log(

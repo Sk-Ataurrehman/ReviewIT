@@ -4,7 +4,8 @@ export interface ReviewJob{
     prHeadSha: string,
     repositoryName: string 
     prTitle:string,
-    prBody: string
+    prBody: string,
+    installationId: number
 }
 
 export interface ReviewComment {
