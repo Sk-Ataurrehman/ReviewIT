@@ -4,8 +4,8 @@ import { redisURL } from "../config";
 import { getPRDifference, postReviewComments } from "../services/githubService";
 import IORedis from "ioredis";
 import { getAIResponse } from "../services/groqService";
-import { prisma } from "../utils/prisma";
-import { getInstallationOctoKit } from "../utils/githubAuth";
+import { prisma } from "../libs/prisma";
+import { getInstallationOctoKit } from "../libs/githubAuth";
 
 const workerRedis = new IORedis(redisURL, {
   maxRetriesPerRequest: null,

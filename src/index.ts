@@ -2,9 +2,9 @@ import "dotenv/config";
 import express from "express";
 import { WebhookRouter } from "./routes/webhook";
 import { HealthRouter } from "./routes/health";
-import {reviewWorker} from "./queues/reviewWorker";
+import {reviewWorker} from "./workers/reviewWorker";
 import { ReviewsRouter } from "./routes/review";
-import { redis } from "./utils/redis";
+import { redis } from "./libs/redis";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
 
