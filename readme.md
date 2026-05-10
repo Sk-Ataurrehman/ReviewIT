@@ -2,7 +2,7 @@
 
 ReviewIT is a GitHub App that automatically reviews pull requests using AI. When a PR is opened or updated, ReviewIT fetches the diff, analyzes it for bugs, security vulnerabilities, and performance issues, and posts inline review comments directly on the PR — all within seconds.
 
-Built as a deep-dive learning project to understand event-driven architecture, async job processing, GitHub App authentication, and LLM integration in a real production-like system.
+Built as a deep-dive learning project to understand event-driven architecture, async job processing, GitHub App authentication, and LLM integration in a realtime system.
 
 ---
 
