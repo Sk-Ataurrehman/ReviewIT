@@ -117,7 +117,7 @@ npm run dev
 ngrok http 3000
 ```
 
-7. Set the ngrok URL as your GitHub App's webhook URL and install the app on a repository
+7. Install the github app on a repository
 
 ---
 
@@ -128,26 +128,5 @@ ngrok http 3000
 | POST | `/webhook` | Receives GitHub PR events |
 | GET | `/health` | Returns server, Redis, and DB health status |
 | GET | `/reviews/:owner/:repo/:prNumber` | Returns the latest review for a PR |
-
----
-
-## Resume Description
-
-> **ReviewIT — AI Code Review GitHub Bot** *(Node.js, TypeScript, Express, BullMQ, PostgreSQL, Groq API)*
->
-> Built an event-driven GitHub App that automatically reviews pull requests using Llama 3.3 70B via Groq. Implemented HMAC-SHA256 webhook signature verification, GitHub App installation token authentication, and async job processing with BullMQ and Redis. Designed a PostgreSQL schema with Prisma for review history tracking, duplicate prevention via composite unique constraints, and full review lifecycle management. Integrated structured LLM prompting with JSON schema enforcement, diff truncation, and graceful error fallback.
-
----
-
-## What I Learned
-
-This project was intentionally built step by step from scratch to understand:
-
-- How GitHub Apps work under the hood (JWT → installation token flow)
-- Why webhook signature verification matters and how HMAC works
-- How to design an async job processing pipeline that's resilient to failures
-- How to write structured prompts that produce consistent, parseable LLM output
-- How to model application state in a database (status lifecycles, deduplication)
-- The difference between building something that works and building something that's maintainable
 
 ---
