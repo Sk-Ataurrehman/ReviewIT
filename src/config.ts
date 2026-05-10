@@ -1,5 +1,3 @@
-import { app } from ".";
-
 const secret = process.env.WEBHOOK_SECRET;
 export const redisURL = process.env.REDIS_URL || "redis://localhost:6379";
 const githubToken = process.env.GITHUB_TOKEN;
